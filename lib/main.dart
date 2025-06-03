@@ -25,7 +25,7 @@ class TypingTrainerApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: context.watch<TypingProvider>().themeMode,
-      home: const HomePage(),
+      home: HomePage(),
     );
   }
 }
