@@ -1,0 +1,31 @@
+publish_to: none
+name: typing_trainer
+description: A typing practice application
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.1
+  # fl_chart: ^1.0.0
+  shared_preferences: ^2.2.2
+  audioplayers: ^4.1.0
+  flutter_hooks: ^0.21.2
+  fl_chart:
+    git:
+      url: https://github.com/imaNNeo/fl_chart.git
+      ref: main
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/sounds/

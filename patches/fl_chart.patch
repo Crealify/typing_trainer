@@ -1,0 +1,13 @@
+diff --git a/lib/src/utils/utils.dart b/lib/src/utils/utils.dart
+index abc123..def456 100644
+--- a/lib/src/utils/utils.dart
++++ b/lib/src/utils/utils.dart
+@@ -266,7 +266,7 @@ TextPainter getTextPainter(
+   String text, {
+   required TextStyle textStyle,
+ }) {
+-  if (MediaQuery.boldTextOverride(context)) {
++  if (MediaQuery.maybeOf(context)?.boldText ?? false) {
+     textStyle = textStyle.merge(const TextStyle(fontWeight: FontWeight.bold));
+   }
+   return TextPainter(
