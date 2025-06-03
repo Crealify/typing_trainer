@@ -2,17 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:typing_trainer/presentation/providers/typing_providers.dart';
 
-class FullKeyboard extends StatelessWidget {
+class FullKeyboard extends StatefulWidget {
   const FullKeyboard({super.key});
 
   @override
+  State<FullKeyboard> createState() => _FullKeyboardState();
+}
+
+class _FullKeyboardState extends State<FullKeyboard> {
+  final keyRows = [
+    ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+    ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+    ['Z', 'X', 'C', 'V', 'B', 'N', 'M'],
+    [' '], // Space bar
+  ];
+
+  @override
   Widget build(BuildContext context) {
-    final keyRows = [
-      ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
-      ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-      ['Z', 'X', 'C', 'V', 'B', 'N', 'M'],
-      [' '], // Space bar
-    ];
+    final provider = Provider.of<TypingProvider>(context, listen: false);
 
     return Container(
       padding: const EdgeInsets.all(10),
@@ -25,7 +32,6 @@ class FullKeyboard extends StatelessWidget {
               return KeyboardKey(
                 keyChar: key,
                 onTap: () {
-                  final provider = context.read<TypingProvider>();
                   provider.handleInput(provider.userInput + key);
                 },
                 isSpace: key == ' ',
@@ -38,7 +44,7 @@ class FullKeyboard extends StatelessWidget {
   }
 }
 
-class KeyboardKey extends StatelessWidget {
+class KeyboardKey extends StatefulWidget {
   final String keyChar;
   final VoidCallback onTap;
   final bool isSpace;
@@ -51,31 +57,55 @@ class KeyboardKey extends StatelessWidget {
   });
 
   @override
+  State<KeyboardKey> createState() => _KeyboardKeyState();
+}
+
+class _KeyboardKeyState extends State<KeyboardKey> {
+  bool _isPressed = false;
+
+  @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      onTap: () {
+        widget.onTap();
+        setState(() => _isPressed = false);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 50),
         margin: const EdgeInsets.all(2),
         padding: EdgeInsets.symmetric(
-          horizontal: isSpace ? 40 : 12,
+          horizontal: widget.isSpace ? 40 : 12,
           vertical: 15,
         ),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
+          color: _isPressed
+              ? Theme.of(context).colorScheme.primary.withOpacity(0.2)
+              : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(5),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 2,
-              offset: const Offset(0, 1),
-            ),
-          ],
+          boxShadow: _isPressed
+              ? []
+              : [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 2,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          ),
         ),
         child: Text(
-          keyChar,
+          widget.keyChar,
           style: TextStyle(
-            fontSize: isSpace ? 14 : 18,
+            fontSize: widget.isSpace ? 14 : 18,
             fontWeight: FontWeight.bold,
+            color: _isPressed
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ),

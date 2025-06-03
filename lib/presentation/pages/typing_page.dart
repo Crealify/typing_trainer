@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:typing_trainer/presentation/providers/typing_providers.dart';
 import 'package:typing_trainer/presentation/widgets/keyboard.dart';
@@ -16,6 +17,7 @@ class TypingPage extends StatefulWidget {
 
 class _TypingPageState extends State<TypingPage> {
   late final FocusNode _focusNode;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -29,34 +31,55 @@ class _TypingPageState extends State<TypingPage> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<TypingProvider>();
+
+    // Auto-scroll to keep cursor visible
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Typing Practice'),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              context.read<TypingProvider>().startSession(widget.text);
-            },
-          ),
-        ],
       ),
-      body: Column(
-        children: [
-          const StatsPanel(),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: TypingText(
-                text: widget.text,
-                userInput: context.watch<TypingProvider>().userInput,
-                accuracy: context.watch<TypingProvider>().accuracy,
+      body: RawKeyboardListener(
+        focusNode: _focusNode,
+        onKey: (event) {
+          if (event is RawKeyDownEvent) {
+            if (event.logicalKey == LogicalKeyboardKey.backspace) {
+              provider.handleInput(
+                provider.userInput.substring(0, provider.userInput.length - 1),
+              );
+            } else if (event.logicalKey.keyLabel.length == 1) {
+              provider
+                  .handleInput(provider.userInput + event.logicalKey.keyLabel);
+            }
+          }
+        },
+        child: Column(
+          children: [
+            const StatsPanel(),
+            Expanded(
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(20),
+                child: TypingText(
+                  text: widget.text,
+                  userInput: provider.userInput,
+                  currentIndex: provider.currentIndex,
+                ),
               ),
             ),
-          ),
-          const FullKeyboard(),
-        ],
+            const FullKeyboard(),
+          ],
+        ),
       ),
     );
   }
