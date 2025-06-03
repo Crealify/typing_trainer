@@ -29,3 +29,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/sounds/
+    - assets/texts/sentences.json
+    - assets/texts/finger_practice.json
